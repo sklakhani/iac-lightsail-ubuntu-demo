@@ -1,0 +1,33 @@
+---
+- hosts: all
+  tasks:
+    - name: create directory ~/.devpanel/
+      file:
+        path: "~/.devpanel/"
+        recurse: yes
+        state: directory
+
+    - name: create file ~/.devpanel/docker-compose.yml
+      file:
+        path: "~/.devpanel/docker-compose.yml"
+        state: touch
+
+    - name: write content of file ~/.devpanel/docker-compose.yml
+      copy:
+        content: |-
+          version: '3'
+          services:
+            database:
+              image: mysql:5.7
+              ports:
+                - 3306:3306
+              volumes:
+                - "./data/mysql:/var/lib/mysql/"
+              environment: 
+                - MYSQL_ROOT_PASSWORD={{ database_password }}
+        dest: ~/.devpanel/docker-compose.yml
+
+    - name: docker compose up
+      shell:
+        chdir: ~/.devpanel/
+        cmd: docker-compose up -d
